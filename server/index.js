@@ -25,6 +25,39 @@ app.get("/", (req, res) => {
 io.on("connection", (socket) => {
   console.log("A user connected:", socket.id);
 
+  socket.on("join-room", (data) => {
+    socket.join(data.roomId);
+
+    console.log(`${data.nickname} joined room ${data.roomId}`);
+  });
+
+  socket.on("play", (data) => {
+    console.log(`Play received from ${data.nickname} in room ${data.roomId}`);
+
+    socket.to(data.roomId).emit("play", {
+      from: data.nickname,
+    });
+  });
+
+  socket.on("pause", (data) =>{
+    console.log(`Pause received from ${data.nickname} in room ${data.roomId}`);
+    
+    socket.to(data.roomId).emit("pause", {
+      from: data.nickname,
+    });
+  })
+
+  socket.on("change-video", (data) => {
+  console.log(
+    `Video changed by ${data.nickname} in room ${data.roomId}: ${data.videoId}`
+  );
+
+    socket.to(data.roomId).emit("change-video", {
+      from: data.nickname,
+      videoId: data.videoId,
+  });
+});
+
   socket.on("disconnect", () => {
     console.log("A user disconnected:", socket.id);
   });
